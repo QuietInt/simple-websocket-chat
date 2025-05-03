@@ -27,6 +27,7 @@ int main()
     std::mutex mutex;
     std::condition_variable cv;
     bool connected = false;
+    std::string defsrv = "ws://80.66.89.224:8080" //default server
     std::string url = "ws://localhost:8080"; // default to localhost
 
     webSocket.setUrl(url);
@@ -52,14 +53,18 @@ int main()
         }
     });
     std::string input;
-    std::cout << "Enter server IP (e.g., ws://*:8080), or 'y' if it's running locally: ";
+    std::cout << "Enter server IP (e.g., ws://*:8080), or 'y' if it's running locally, and 'd' if you want to connect default server: ";
     std::getline(std::cin, input);
-    if (input != "y")
+    if (input != "y" && input != "d")
     {
         url = input;
         webSocket.setUrl(url);
     }
-
+    else if(input == "d")
+    {
+        url = "ws://80.66.89.224:8080";
+        webSocket.setUrl(url);
+    }
     webSocket.start();
     std::cout << "Connecting...";
 
