@@ -75,15 +75,15 @@ int main()
     {
         while (true)
         {
-            std::cout << "[Client] Enter your message or type 'exit' to quit: ";
-            std::getline(std::cin, msg);
+        std::cout << "\n[Client] Enter your message or command: ";  
+        std::getline(std::cin, msg);
             if (msg == "exit")
             {
                 break;
             }
             else
             {
-                webSocket.send(msg + "\n");
+                webSocket.send(msg);  
             }
         }
     }

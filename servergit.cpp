@@ -44,41 +44,55 @@ int main()
     ix::WebSocketServer server(8080, "0.0.0.0");
 
     // Callback for each incoming message
-    server.setOnClientMessageCallback([](std::shared_ptr<ix::ConnectionState> connectionState,
-                                         ix::WebSocket& webSocket,
-                                         const ix::WebSocketMessagePtr& msg)
-    {
-        if (msg->type == ix::WebSocketMessageType::Message)
-        {
-            std::cout << "\n[Server/Info] Received message from client: " << msg->str << std::endl;
-            webSocket.send("\n[Server/Info] Server received: " + msg->str);
-        }
-    });
+    // Callback for each incoming message
+server.setOnClientMessageCallback([&SERVER_OWNER, &SERVER_START_TIME](
+    std::shared_ptr<ix::ConnectionState> connectionState,
+    ix::WebSocket& webSocket,
+    const ix::WebSocketMessagePtr& msg)
+{
     if (msg->type == ix::WebSocketMessageType::Message)
-        {
-            std::string message = msg->str;
-            
-            // command callback
-            if (message == "/history") {
-                std::string history = readChatHistory();
-                webSocket.send("\n=== Chat History ===\n" + history + "================\n");
-            }
-            else if (message == "/info") {
-                std::stringstream info;
-                info << "\n=== Server Info ===\n"
-                     << "Server Owner: " << SERVER_OWNER << "\n"
-                     << "Server Start Time (UTC): " << SERVER_START_TIME << "\n"
-                     << "Current Time (UTC): " << getCurrentUTCTime() << "\n"
-                     << "================\n";
-                webSocket.send(info.str());
-            }
-            else {
-                // save message
-                saveMessage(message);
-                std::string timestampedMessage = "[" + getCurrentUTCTime() + "] " + message;
-                webSocket.send(timestampedMessage);
-            }
+    {
+        std::string message = msg->str;
+        std::cout << "\n[Server/Info] Received message from client: " << message << std::endl;
+        
+        // command callback
+        if (message == "/history") {
+            std::string history = readChatHistory();
+            std::cout << "\n[Server/Info] Sending chat history to client" << std::endl;
+            webSocket.send("\n=== Chat History ===\n" + history + "================\n");
         }
+        else if (message == "/info") {
+            std::stringstream info;
+            info << "\n=== Server Info ===\n"
+                 << "Server Owner: " << SERVER_OWNER << "\n"
+                 << "Server Start Time (UTC): " << SERVER_START_TIME << "\n"
+                 << "Current Time (UTC): " << getCurrentUTCTime() << "\n"
+                 << "================\n";
+            std::cout << "\n[Server/Info] Sending server info to client" << std::endl;
+            webSocket.send(info.str());
+        }
+        else {
+            // save message
+            saveMessage(message);
+            std::string timestampedMessage = "[" + getCurrentUTCTime() + "] " + message;
+            std::cout << "[Server/Info] Message saved and timestamped: " << timestampedMessage << std::endl;
+            webSocket.send(timestampedMessage);
+        }
+    }
+    else if (msg->type == ix::WebSocketMessageType::Open)
+    {
+        std::cout << "\n[Server/Info] New client connected." << std::endl;
+        webSocket.send("[Server] Welcome to the chat!");
+    }
+    else if (msg->type == ix::WebSocketMessageType::Close)
+    {
+        std::cout << "\n[Server/Info] Client disconnected." << std::endl;
+    }
+    else if (msg->type == ix::WebSocketMessageType::Error)
+    {
+        std::cout << "\n[Server/Error] Connection error: " << msg->errorInfo.reason << std::endl;
+    }
+});
 
     auto res = server.listen();
     if (!res.first)
