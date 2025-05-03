@@ -1,7 +1,7 @@
 /* Simple WebSocket Client */
 /* by Baton Software → QuietInt, Baton Soft. CEO */
 /* Created 3 May 2025 */
-/* To use this client, you need to run a WebSocket server (compiled server.cpp) */
+/* To use this client, you need to run a WebSocket server (compiled servergit.cpp) */
 
 #include <iostream>
 #include <ixwebsocket/IXWebSocketServer.h>
