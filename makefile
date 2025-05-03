@@ -7,10 +7,10 @@ IX = $(HOME)/IXWebSocket
 all: client server
 
 client: main.cpp
-	$(CXX) $(CXXFLAGS) new_main.cpp -o client $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) main.cpp -o client $(LDFLAGS)
 
 server: servergit.cpp
-	$(CXX) $(CXXFLAGS) server.cpp -o server $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) servergit.cpp -o server $(LDFLAGS)
 
 clean:
 	rm -f client server
