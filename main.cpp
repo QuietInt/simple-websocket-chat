@@ -7,9 +7,18 @@
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <mutex>
 #include <condition_variable>
+#include <iomanip>
+#include <sstream>
 
-using namespace std;
-using namespace ix;
+//function for neat formatting
+void printFormattedMessage(const string& message) {
+    if (message.substr(0, 3) == "===") {
+        cout << "\n" << message << endl;
+    }
+    else {
+        cout << message << endl;
+    }
+}
 
 int main()
 {
@@ -25,20 +34,23 @@ int main()
     {
         if (msg->type == WebSocketMessageType::Message)
         {
-            cout << msg->str << endl;
+            printFormattedMessage(msg->str);
         }
         else if (msg->type == WebSocketMessageType::Open)
         {
             connected = true;
             cv.notify_one();
             cout << "Connection established!" << endl;
+            cout << "\nAvailable commands:" << endl;
+            cout << "/history - show chat history" << endl;
+            cout << "/info    - show server information" << endl;
+            cout << "exit     - close connection" << endl;
         }
         else if (msg->type == WebSocketMessageType::Error)
         {
             cout << "Connection error: " << msg->errorInfo.reason << endl; 
         }
     });
-
     string input;
     cout << "Enter server IP (e.g., ws://*:8080), or 'y' if it's running locally: ";
     getline(cin, input);
