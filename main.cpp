@@ -27,7 +27,7 @@ int main()
     std::mutex mutex;
     std::condition_variable cv;
     bool connected = false;
-    std::string defsrv = "ws://80.66.89.224:8080" //default server
+    std::string defsrv = "ws://80.66.89.224:8080"; //default server
     std::string url = "ws://localhost:8080"; // default to localhost
 
     webSocket.setUrl(url);
