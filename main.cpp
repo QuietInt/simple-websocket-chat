@@ -1,47 +1,59 @@
 /* Simple WebSocket Client */
 /* by Baton Software → QuietInt, Baton Soft. CEO */
 /* Created 3 May 2025 */
-/* To use this client, you need to run a WebSocket server (compiled server.cpp) */
+/* To use this client, you need to run a WebSocket server (compiled servergit.cpp) */
 
 #include <iostream>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <mutex>
 #include <condition_variable>
+#include <iomanip>
+#include <sstream>
 
-using namespace std;
-using namespace ix;
+//function for neat formatting
+void printFormattedMessage(const std::string& message) {
+    if (message.substr(0, 3) == "===") {
+        std::cout << "\n" << message << std::endl;
+    }
+    else {
+        std::cout << message << std::endl;
+    }
+}
 
 int main()
 {
-    string msg;
-    WebSocket webSocket;
-    mutex mutex;
-    condition_variable cv;
+    std::string msg;
+    ix::WebSocket webSocket;
+    std::mutex mutex;
+    std::condition_variable cv;
     bool connected = false;
-    string url = "ws://localhost:8080"; // default to localhost
+    std::string url = "ws://localhost:8080"; // default to localhost
 
     webSocket.setUrl(url);
-    webSocket.setOnMessageCallback([&connected, &cv](const WebSocketMessagePtr& msg)
+    webSocket.setOnMessageCallback([&connected, &cv](const ix::WebSocketMessagePtr& msg)
     {
-        if (msg->type == WebSocketMessageType::Message)
+        if (msg->type == ix::WebSocketMessageType::Message)
         {
-            cout << msg->str << endl;
+            printFormattedMessage(msg->str);
         }
-        else if (msg->type == WebSocketMessageType::Open)
+        else if (msg->type == ix::WebSocketMessageType::Open)
         {
             connected = true;
             cv.notify_one();
-            cout << "Connection established!" << endl;
+            std::cout << "Connection established!" << std::endl;
+            std::cout << "\nAvailable commands:" << std::endl;
+            std::cout << "/history - show chat history" << std::endl;
+            std::cout << "/info    - show server information" << std::endl;
+            std::cout << "exit     - close connection" << std::endl;
         }
-        else if (msg->type == WebSocketMessageType::Error)
+        else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            cout << "Connection error: " << msg->errorInfo.reason << endl; 
+            std::cout << "Connection error: " << msg->errorInfo.reason << std::endl; 
         }
     });
-
-    string input;
-    cout << "Enter server IP (e.g., ws://*:8080), or 'y' if it's running locally: ";
-    getline(cin, input);
+    std::string input;
+    std::cout << "Enter server IP (e.g., ws://*:8080), or 'y' if it's running locally: ";
+    std::getline(std::cin, input);
     if (input != "y")
     {
         url = input;
@@ -49,13 +61,13 @@ int main()
     }
 
     webSocket.start();
-    cout << "Connecting...";
+    std::cout << "Connecting...";
 
     {
-        unique_lock<std::mutex> lock(mutex);
+        std::unique_lock<std::mutex> lock(mutex);
         if (!connected)
         {
-            cv.wait_for(lock, chrono::seconds(5), [&connected]{ return connected; });
+            cv.wait_for(lock, std::chrono::seconds(5), [&connected]{ return connected; });
         }
     }
 
@@ -63,22 +75,22 @@ int main()
     {
         while (true)
         {
-            cout << "[Client] Enter your message or type 'exit' to quit: ";
-            getline(cin, msg);
+        std::cout << "\n[Client] Enter your message or command: ";  
+        std::getline(std::cin, msg);
             if (msg == "exit")
             {
                 break;
             }
             else
             {
-                webSocket.send(msg + "\n");
+                webSocket.send(msg);  
             }
         }
     }
     else
     {
-        cout << "\nFailed to connect to the server.";
-        cout << "\nShutting down client...";
+        std::cout << "\nFailed to connect to the server.";
+        std::cout << "\nShutting down client...";
         return 1;
     }
 
