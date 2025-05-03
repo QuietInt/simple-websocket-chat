@@ -31,5 +31,5 @@ endif()
 
 # Server
 if(BUILD_SERVER)
-  add_executable(server servergit.cpp)
+  add_executable(server server.cpp)
 endif()
